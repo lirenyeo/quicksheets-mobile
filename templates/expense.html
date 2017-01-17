@@ -1,0 +1,41 @@
+<html ng-app="budgetApp">
+ 
+  <head>
+    <title>Quicksheets</title>
+  </head>
+
+  <body ng-controller="expenseCtrl">
+
+  <ion-view title="Expense">
+    <ion-content padding="true" class="has-header">
+
+      <h4 id="expense-heading1" style="color:#000000;font-weight:lighter;text-align:center;">      <span>
+        <img src="img/sheets-logo.png" height="13">
+      </span>Add Expense</h4>
+      <form name="form.expenseForm" class="list form-manager">
+        <label class="item item-input">
+          <span class="input-label">Amount</span>
+          <input type="number" placeholder="0.00" name="amount" ng-model="expense.amount" required />
+        </label>
+
+        <label class="item item-input">
+          <span class="input-label">Description</span>
+          <input type="text" placeholder="Optional" name="description" ng-model="expense.description">
+        </label>
+
+        <div class="spacer" style="width: 300px; height: 11px;"></div>
+
+        <label class="item item-select" ng-model="category">
+          <span class="input-label">Category</span>
+          <select ng-options="category.name as category.name for category in categories" name="category" ng-model="expense.category" ng-init="expense.category='Food'">
+          </select>
+        </label>
+        <button ng-click="submit(expense)" ng-disabled="buttonDisabled" class="button button-positive  button-block">Submit</button>
+      </form>
+
+    </ion-content>
+  </ion-view>
+
+          <button class="button button-positive  button-block">Submit</button>
+  </body>
+</html>
