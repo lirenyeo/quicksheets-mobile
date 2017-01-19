@@ -5,17 +5,34 @@ angular.module('app.controllers', [])
   // TIP: Access Route Parameters for your page via $stateParams.parameterName
   function($scope, $http, $ionicLoading, $ionicPopup) {
 
-    $scope.showAlert = function(title, message) {
-      $ionicPopup.alert({
-        title: title,
-        template: message
-      });
-    };
-
     $scope.form = {};
 
-    // show loading icon
-    $scope.show = function() {
+    $scope.expense = {
+      "amount": "",
+      "description": ""
+    };
+
+    // reset form inputs
+    $scope.resetForm = function() {
+      $scope.expense.amount = "";
+      $scope.expense.description = "";
+      $scope.form.expenseForm.$setPristine();
+    };
+
+    // show response after form submit
+    $scope.popupResult = function(title) {
+      $ionicPopup.alert({
+        title: title,
+        buttons: [{
+          type: 'button icon ion-checkmark button-dark'
+        }]
+      });
+      $ionicLoading.hide();
+      $scope.buttonDisabled = false;
+    };
+
+    // show loading overlay
+    $scope.showLoading = function() {
       $scope.loading = $ionicLoading.show({
         template: '<ion-spinner icon="lines"></ion-spinner>',
         content: 'Submitting...',
@@ -25,50 +42,48 @@ angular.module('app.controllers', [])
       });
     };
 
-    // hide loading icon
-    $scope.hide = function() {
-      $ionicLoading.hide();
-    };
-
     // when submit button is pressed
     $scope.submit = function(expense) {
-      $scope.show();
+      console.log($scope.form.expenseForm.$valid);
       if ($scope.form.expenseForm.$valid) {
+        $scope.showLoading();
+        $scope.buttonDisabled = true;
         $scope.addExpense(expense);
       } else {
+        console.log("inside else");
         $ionicLoading.show({
-          template: 'Please enter a valid amount',
-          duration: 1000
+          template: '<i class="icon ion-alert-circled"></i> Please enter a valid amount',
+          showBackdrop: false,
+          animation: '',
+          duration: 1000,
+          showDelay: 0
         });
       }
     };
 
     // call expense API
     $scope.addExpense = function(expense) {
-      $scope.show();
-      $scope.buttonDisabled = true;
-      var link;
-      var apiCall = {
-        method: 'POST',
-        url: 'https://www.api-end-point.com',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        params: {
-          amount: expense.amount,
-          description: expense.description,
-          category: expense.category
-        }
-      };
+      $http.get('templates/secrets.json').success(function(data) {
+        var apiCall = {
+          method: 'POST',
+          url: data.apiUrl,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          params: {
+            amount: expense.amount,
+            description: expense.description,
+            category: expense.category,
+            api_token: data.apiToken
+          }
+        };
 
-      $http(apiCall).then(function(successResponse) {
-        $scope.hide();
-        $scope.buttonDisabled = false;
-        $scope.showAlert("Done", "Spreadsheet updated! :)");
-      }, function(failedResponse) {
-        $scope.hide();
-        $scope.buttonDisabled = false;
-        $scope.showAlert("Error", "Something went wrong :(");
+        $http(apiCall).then(function(successResponse) {
+          $scope.popupResult('<center>Spreadsheet updated :)</center>');
+          $scope.resetForm();
+        }, function(failedResponse) {
+          $scope.popupResult('<center>Something went wrong :(</center>');
+        });
       });
     };
 
